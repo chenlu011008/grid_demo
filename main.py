@@ -34,7 +34,7 @@ map, entities = generate_random_map(GRID_H, GRID_W, layout)
 # create agent
 # --------------------------
 agent_specs = {
-    "worker": {"count": 1, "policy": move_towards_goal},
+    "worker": {"count": 2, "policy": move_towards_goal},
     "vehicle": {"count": 1}
     }
 
@@ -62,11 +62,9 @@ for t in range(TIMESTEPS):
 
     env.step(actions)
 
-    # eval process #
-    evaluator.record_step()
+    metrics = evaluator.eval_metrics()        
 
-    renderer.render(t, pause_time=PAUSE_TIME)
+    renderer.render(t, PAUSE_TIME)
+    renderer.render_metrics(metrics) 
 
 renderer.close()
-evaluator.print_summary()
-

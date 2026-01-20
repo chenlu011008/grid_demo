@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
 from matplotlib.lines import Line2D
 from matplotlib.patches import Patch
+from matplotlib.table import Table
 
 CELL_COLORS = {
     0: 'white',        # EMPTY
@@ -29,7 +30,10 @@ class Renderer:
         self.h, self.w = grid.shape
 
         plt.ion()
-        self.fig, self.ax = plt.subplots(figsize=(10, 6))
+        # self.fig, self.ax = plt.subplots(figsize=(12, 6))
+        self.fig = plt.figure(figsize=(10, 6))
+
+        self.ax = self.fig.add_axes([0.03, 0.1, 0.6, 0.75])
 
         # background
         cmap = ListedColormap([CELL_COLORS[i] for i in range(len(CELL_COLORS))])
@@ -99,6 +103,9 @@ class Renderer:
 
         self.agent_scatters = []
 
+        self.metric_table = None
+
+
     def render(self, t, pause_time=0.1):
         self.img.set_data(self.env.get_semantic_grid())
 
@@ -122,6 +129,27 @@ class Renderer:
         self.ax.set_title(f"Simulation t = {t}")
         self.fig.canvas.draw_idle()
         plt.pause(pause_time)
+
+    def render_metrics(self, metrics):
+        if self.metric_table:
+            self.metric_table.remove()
+
+        table_data = []
+        for name in metrics["path_lengths"]:
+            path_len = metrics["path_lengths"][name]
+            achieved = "Yes" if metrics["goal_achieved"][name] else "No"
+            table_data.append([name, path_len, achieved])
+        table_data.append(["Collisions", metrics["num_collisions"], ""])
+
+        # table format
+        self.metric_table = self.ax.table(
+            cellText=table_data,
+            colLabels=["Agent", "Path Length", "Goal Achieved"],
+            loc="right",
+            cellLoc="center",
+            colLoc="center",
+            bbox=[1.02, 0, 0.6, 0.4]
+        )
 
     def close(self):
         plt.ioff()
