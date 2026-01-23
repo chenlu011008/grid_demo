@@ -39,8 +39,8 @@ agent_specs = {
 
 agents = generate_random_agents(map, agent_specs)
 
-for a in agents:
-    print(a)
+# for a in agents:
+#     print(a)
 
 # --------------------------
 # create environment

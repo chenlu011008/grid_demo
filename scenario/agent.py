@@ -22,9 +22,8 @@ class Agent:
         self.pos = pos
         self.map = map
         self.goal_chain = goal_chain
-        self.active_goal_chain = self.goal_chain
+        self.active_goal_chain = active_goal_chain or goal_chain
         self.goals = build_init_goal(self, goal_chain)
-        # self.goals = get_goals(self)     # ultimate goals for finite sim/initial goals for infinite sim
         
         self.current_goal_idx = 0
         self.status = AgentStatus.MOVING
