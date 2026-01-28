@@ -10,6 +10,25 @@ class Goal:
 
     def is_satisfied(self, agent):
         return agent.pos == self.pos
+    
+# --------------------------
+# Executable Tasks
+# --------------------------
+
+TASK_EXEC_TIME = {
+    
+    # worker
+    "processing": 5,
+    "rest": 15,
+
+    # vehicle
+    "loading": 5,
+    "unloading": 5,
+    "parking": 10,
+
+    # --> add various tasks and exec_steps here <--
+    # ......
+}
 
 
 # --------------------------
@@ -19,14 +38,18 @@ class Goal:
 # for both finite and infinite simulation
 # a goal chain = a list of Goal objects (pos, executing_steps)
 
-INIT_GOAL_CHAIN = {
-    "worker_default": [
-        ([CellType.WORKSHOP], 5)],
 
+INIT_GOAL_CHAIN = {
+    
+    "worker_default": [
+        {"location": [CellType.WORKSHOP], "task": "processing"},
+        ],
+        
     "vehicle_default": [
-        ([CellType.DEPOT], 5),
-        ([CellType.WORKSHOP], 5),
-        ([CellType.PARKING], 10)],
+        {"location": [CellType.DEPOT], "task": "loading"},
+        {"location": [CellType.WORKSHOP], "task": "unloading"},
+        {"location": [CellType.PARKING], "task": "parking"},
+        ],
 
     # --> add various chains here <--
     # ......
@@ -36,13 +59,15 @@ INIT_GOAL_CHAIN = {
 # for infinite simulation --> new goal generation strategy
 ACTIVE_GOAL_CHAIN = {
 
-    "worker_default": [
-        ([CellType.WORKSHOP], 5)],
-    
+      "worker_default": [
+        {"location": [CellType.WORKSHOP], "task": "processing"},
+        ],
+
     "vehicle_default": [
-        ([CellType.DEPOT], 5),
-        ([CellType.WORKSHOP], 5),
-        ([CellType.PARKING], 10)],
+        {"location": [CellType.DEPOT], "task": "loading"},
+        {"location": [CellType.WORKSHOP], "task": "unloading"},
+        {"location": [CellType.PARKING], "task": "parking"},
+        ],
 
     # --> add various chains here <--
     # ......
@@ -54,7 +79,7 @@ ACTIVE_GOAL_CHAIN = {
 # Goal Generation
 # ----------------
 
-def sample_goal(grid, cell_types, executing_steps):
+def sample_goal(grid, cell_types, task_name):
     """
     return a Goal object
     --> specify a target cell from all valid cells as the goal pas
@@ -71,6 +96,8 @@ def sample_goal(grid, cell_types, executing_steps):
         return None
 
     pos = random.choice(valid_cells)
+    executing_steps = TASK_EXEC_TIME.get(task_name, 5)
+
     return Goal(pos, executing_steps)
 
 
@@ -78,8 +105,8 @@ def build_init_goal(agent, chain_name):
     chain = INIT_GOAL_CHAIN.get(chain_name, [])
     goals = []
 
-    for cell_types, steps in chain:
-        goal = sample_goal(agent.map, cell_types, steps)
+    for goal_info in chain:
+        goal = sample_goal(agent.map, goal_info["location"], goal_info["task"])
         if goal:
             goals.append(goal)
 
@@ -89,8 +116,8 @@ def build_active_goal(agent, chain_name):
     chain = ACTIVE_GOAL_CHAIN.get(chain_name, [])
     goals = []
 
-    for cell_types, steps in chain:
-        goal = sample_goal(agent.map, cell_types, steps)
+    for goal_info in chain:
+        goal = sample_goal(agent.map, goal_info["location"], goal_info["task"])
         if goal:
             goals.append(goal)
 
